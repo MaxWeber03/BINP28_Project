@@ -5,4 +5,8 @@
 *.gff
 *.vcf
 *.fa
-
+*.aux
+*.bbl
+*.log
+*.out
+*.blg

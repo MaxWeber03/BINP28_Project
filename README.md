@@ -46,8 +46,11 @@ Everything after FORMAT are the individual samples.
 2. Run linkage pruning => SNPs should be inherented intendepently. Looking at linkage disequilibrium would be good, but available time does not allow that.
 3. Run PCA => find SNPs that are explaining variance between the samples/clusters
     - Expectation: samples should cluster together withhin each population
+    - SNPRelate
 
 ## To Do
 - find software to filter SNPs, find approiate thresholds, remove Naxos2 outgroup
+- to run the PCR: SNPRelate
+    - What format should the input data have?
 
 

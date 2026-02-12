@@ -43,14 +43,23 @@ Everything after FORMAT are the individual samples.
 
 ## Worflow outline
 1. Filter VCF for only good SNPs => looks at papers for threshold and tools
+    - vcftools https://academic.oup.com/bioinformatics/article/27/15/2156/402296
 2. Run linkage pruning => SNPs should be inherented intendepently. Looking at linkage disequilibrium would be good, but available time does not allow that.
 3. Run PCA => find SNPs that are explaining variance between the samples/clusters
     - Expectation: samples should cluster together withhin each population
-    - SNPRelate
+    - SNPRelate: https://bioconductor.org/packages/release/bioc/vignettes/SNPRelate/inst/doc/SNPRelate.html
 
 ## To Do
 - find software to filter SNPs, find approiate thresholds, remove Naxos2 outgroup
 - to run the PCR: SNPRelate
     - What format should the input data have?
 
+# Filtering
+- Quality Scores => look for threshold recommendations in vcftools
+- Number of Reads => too many are artifacts, too few are untrsuted
+- INDELS, keep them?
+    - look at SNPRelate, does it handle INDELS or should they be removed?
+    - INDEL Realginment => ask Rachel about it
+- only keep SNPs with good data for all the sample
+- filter out the outgroup
 

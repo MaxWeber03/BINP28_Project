@@ -43,3 +43,7 @@ Everything after FORMAT are the individual samples.
 3. Run PCA => find SNPs that are explaining variance between the samples/clusters
     - Expectation: samples should cluster together withhin each population
 
+## To Do
+- find software to filter SNPs, find approiate thresholds, remove Naxos2 outgroup
+
+

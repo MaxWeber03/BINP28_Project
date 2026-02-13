@@ -1,5 +1,6 @@
 # Look at 01_raw/ProjTaxa.vcf
-more 01_raw/ProjTaxa.vcf
+cat 01_raw/ProjTaxa.vcf |  grep -v ^\## | less -S
+# less -S makes it tab delimited
 
 # How many variants are present in the raw vcf?
 # count lines that are not starting with #

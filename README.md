@@ -1,5 +1,9 @@
 Max Weber BINP28 M. Sc. Bioinformatics Programme Lund University, Feb 2026
 
+# Git Repository
+Git Repository for this project can be found here: https://github.com/MaxWeber03/BINP28_Project.
+
+I know that having both the report (latex code) and the project code in the same repo is not a clean solution, but I want to avoid bloating my github with multiple repos for a small project.
 
 # Instructions Summary
 We have a .vcf file without much futher detail on the data or the species. I am tasked with "Genetic relationship/Multivariate relationship from a PCA". We do not have much information. 3.5 days are available including writing of a two pages report and a two slide/3 min presentation.
@@ -27,7 +31,7 @@ less 01_raw/ProjTaxa.vcf
 #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  8N05240 8N05890 8N06612 8N73248 8N73604 K006    K010    K011    K015    K019    Lesina_280      Lesina_281      Lesina_282      Lesina_285      Lesina_286        Naxos2
 ```
 
-Everything after FORMAT are the individual samples.
+Everything after FORMAT are the individual samples. The FILTER column was not used at all (just ".").
 
 ## Example row
 ```
@@ -42,24 +46,36 @@ Everything after FORMAT are the individual samples.
 - PCA very much depends on input data quality
 
 ## Worflow outline
-1. Filter VCF for only good SNPs => looks at papers for threshold and tools
-    - vcftools https://academic.oup.com/bioinformatics/article/27/15/2156/402296
-2. Run linkage pruning => SNPs should be inherented intendepently. Looking at linkage disequilibrium would be good, but available time does not allow that.
+1. Filter VCF for only good SNPs => looks at papers and documentation for threshold
+    - use bcftools, not vcftools since that is deprecated
+    - https://samtools.github.io/bcftools/howtos/index.html
+2. Run linkage pruning => SNPs should be inherented intendepently. Looking at linkage disequilibrium would be good, but available time does not allow that. (Will be done in SNPRelate in R)
 3. Run PCA => find SNPs that are explaining variance between the samples/clusters
     - Expectation: samples should cluster together withhin each population
     - SNPRelate: https://bioconductor.org/packages/release/bioc/vignettes/SNPRelate/inst/doc/SNPRelate.html
 
-## To Do
-- find software to filter SNPs, find approiate thresholds, remove Naxos2 outgroup
-- to run the PCR: SNPRelate
-    - What format should the input data have?
 
-# Filtering
-- Quality Scores => look for threshold recommendations in vcftools
+### Filtering/Setup
+- Take away outgroup first!
+- Quality Scores => look for threshold recommendations in bcftools
 - Number of Reads => too many are artifacts, too few are untrsuted
-- INDELS, keep them?
-    - look at SNPRelate, does it handle INDELS or should they be removed?
-    - INDEL Realginment => ask Rachel about it
-- only keep SNPs with good data for all the sample
-- filter out the outgroup
+    - look at distribution/histrogram of my data
+        - Software for histrogram? => look for tools?
+    - apply it as overall (per SNP)
+        - not more then 2x mean/median is a usable value
+- Only Bi-allelic SNPs or bi-allelic SNPs, multi-allelic SNPs, indels and structural variants?
+    - focus on getting one done, we can compare both => go first with Bi-allelic
+    - SNPRelate can handle INDELS and structural variants
+        - I could try both if I have the time
+        - no INDEL relalignment, that was done before variant calling
+- How many PCs?
+    - can be done through an analysis, but uncommen in this use case, number is going to be very high since we have so many dimensions => expect only 1-3% of variance explained per PC => hence the number of PCs does not have a huge effect on the results
+- Minor Allel Frequency => don't worry about it for now
+    - could be e.g. to give SNP confidence for downstream analysis
+
+## VCF Filtering Details
+
+- AC/AN => needs to be recalculated after removing the outgroup
+    - bcftools filltags => find in docs
+- Simple Options: Quality of SNP and of GT
 

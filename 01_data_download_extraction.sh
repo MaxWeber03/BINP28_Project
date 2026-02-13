@@ -7,3 +7,6 @@ scp inf-27-2025@bioinf-serv2.cob.lu.se:/home2/resources/binp28/Data/ProjTaxa* ./
 # Unpack Data
 gunzip ./01_raw/*.gz
 
+# Delete Data that is not needed for PCA Project
+rm 01_raw/*.fa
+rm 01_raw/*.gff

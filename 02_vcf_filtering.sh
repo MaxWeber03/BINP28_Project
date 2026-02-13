@@ -56,24 +56,71 @@ grep -v ^\## 02_vcf_filtered/outgroup_removed.vcf | less -S
 # Masking samples for some sites, will reduce the AN/AC. We can then filter based on AN/AC in a following step.
 
 ###########
-# 2.1 Filtering per sample sequencing depth
+# 2.1 Masking per sample sequencing depth
 ###########
 
 # We want to filter out very numbers of reads, as these are likely artifacts, and very low numbers of reads, since these have not so much confidence. To have an idea what few or many is in our data, we should look at the distribution of sequenceing depth.
 
 # We can get summary stats from bcftools:
-mkdir 02_vcf_filtered/stats_plots
 
-bcftools stats -s - 02_vcf_filtered/outgroup_removed.vcf > 02_vcf_filtered/stats_plots/stats.vchk
+bcftools stats -s - 02_vcf_filtered/outgroup_removed.vcf > 02_vcf_filtered/stats_outgroup_removed.vchk
 # this generates stats on the vcf file -s - includes all the samples
 
 # create stats
-plot-vcfstats -p 02_vcf_filtered/stats_plots/ 02_vcf_filtered/stats_plots/stats.vchk
+plot-vcfstats -v -p 02_vcf_filtered/stats_plots_outgroup_removed/ 02_vcf_filtered/stats_outgroup_removed.vchk
+# -p is the output dir
+# -v vectorized plots (clearer resolution)
 
-# Let's filter an > 30 (maximum one sample not genotyped)
-# and AC > 3 (about 10% of the AN must be different from the reference)
-# todo: filter for sequencing depth
-# bcftools view -i 'INFO/AN>30 && INFO/AC>3' \
+# Interpretation of the Depth distribution plot:
+# main peak at Depth of 7, declines around 10-15. Number of genotypes for low depth (<4) is small. The cummulitative number of genotypes increases strongly between 5 and 10-15.
+
+# => From this, I am choosing to cut out genotypes with less then 5 and then 14 reads. This means we excluding around 10% of genotypes at the low end (likely to be errors) and about 10% at the high end (likely to be artifacts).
+
+bcftools filter -S . -e 'FORMAT/DP<5 | FORMAT/DP>14' 02_vcf_filtered/outgroup_removed.vcf -o 02_vcf_filtered/dp_masked.vcf
+# -S . let's us mask (replace with missing genotype) the values for samples for a variant, that did not pass the threshold
+# -e applies the Threshold, FMT/DP means the FORMAT/DP field of each sample
+# | => or, exclude if one of the two conditions is met
+
+# confirm that AC and AN have been changed
+grep -v ^\#\# 02_vcf_filtered/outgroup_removed.vcf | less -S
+grep -v ^\#\# 02_vcf_filtered/dp_masked.vcf | less -S
+# yes, some of the AN values have changed, so they appear as they were recalculated
+# if there was more time, it would make sense to check this deeper
+
+###########
+# 2.1 Filtering AC and AN
+###########
+
+# Let's filter AN > 30 (all sites must be present in all samples, this could be done less harshely, but I lack time to mess around with it)
+# and AC > 2 (excluse rare alternatives)
+
+bcftools view -e 'INFO/AN<30 | INFO/AC<3' \
+    02_vcf_filtered/dp_masked.vcf -o 02_vcf_filtered/an_ac_filtered.vcf
 
 
+grep -v ^\#\# 02_vcf_filtered/an_ac_filtered.vcf | less -S
+# filtering has worked
+
+###########
+# 3 Let's rerun the statistics plots to confirm that they have changed as expected
+###########
+
+bcftools stats -s - 02_vcf_filtered/an_ac_filtered.vcf > 02_vcf_filtered/after_filtering.vchk
+# this generates stats on the vcf file -s - includes all the samples
+
+# create stats
+plot-vcfstats -v -p 02_vcf_filtered/stats_plots_after_filtering/ 02_vcf_filtered/after_filtering.vchk
+# -p is the output dir
+# -v vectorized plots (clearer resolution)
+
+# ts/tv improved from 1.68 to 1.79, no more singletons (AC=1)
+# the read depth plot has changed according to our cutoffs
+
+
+# Delete data not needed anymore (replication should be no issue), to save disk space
+rm -r 02_vcf_filtered/stats_plots_after_filtering
+rm -r 02_vcf_filtered/stats_plots_outgroup_removed
+rm 02_vcf_filtered/dp_masked.vcf
+rm 02_vcf_filtered/*.vchk
+rm 02_vcf_filtered/outgroup_removed.vcf
 

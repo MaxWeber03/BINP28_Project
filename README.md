@@ -50,6 +50,9 @@ Further Info on VCF file structure: https://samtools.github.io/hts-specs/VCFv4.5
 ```
 # chr5    1002    .       T       C       1711.32 .       AC=2;AN=4       GT:AD:DP:GQ:PL  ./.:71,0:71:.:. ./.:120,0:120:.:.       ./.:94,0:94:.:. 0/0:72,0:72:0:0,0,25    ./.:124,0:124:.:.       ./.:119,0:119:.:.       ./.:86,0:86:.:.       ./.:72,0:72:.:. ./.:77,0:77:.:. ./.:109,0:109:.:.       ./.:29,0:29:.:. ./.:12,0:12:.:. 1/1:1,9:10:2:254,2,0    ./.:8,0:8:.:.   ./.:20,0:20:.:. ./.:23,0:23:.:.
 ```
+## Filtering
+Filtering has been for read depth with the thresholds >14 and <5 reads in order to exclude likely artifacts (high reads)
+and reads with low confidence (low reads). AN has been filtered with <30 to exclude sites for which not all samples have diploid data. AC was filtered with <3 to exclude sites with very rare alterantives.
 
 **********************************************
 
@@ -86,11 +89,7 @@ Further Info on VCF file structure: https://samtools.github.io/hts-specs/VCFv4.5
 - Minor Allel Frequency => don't worry about it for now
     - could be e.g. to give SNP confidence for downstream analysis
 
-### VCF Filtering Details
 
-- AC/AN => needs to be recalculated after removing the outgroup
-    - bcftools filltags => find in docs
-- Simple Options: Quality of SNP and of GT
 
 ### Further Ideas
 - add Snakemake (if the available time allows)

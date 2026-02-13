@@ -11,5 +11,6 @@
 *.out
 *.blg
 myapalike.bst
-stats_plots/
+stats_plots_outgroup_removed/
 *.swp
+*.vchk

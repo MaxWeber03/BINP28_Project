@@ -73,9 +73,11 @@ Everything after FORMAT are the individual samples. The FILTER column was not us
 - Minor Allel Frequency => don't worry about it for now
     - could be e.g. to give SNP confidence for downstream analysis
 
-## VCF Filtering Details
+### VCF Filtering Details
 
 - AC/AN => needs to be recalculated after removing the outgroup
     - bcftools filltags => find in docs
 - Simple Options: Quality of SNP and of GT
 
+### Further Ideas
+- add Snakemake (if the available time allows)

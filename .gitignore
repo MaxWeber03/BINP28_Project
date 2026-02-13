@@ -11,3 +11,5 @@
 *.out
 *.blg
 myapalike.bst
+stats_plots/
+*.swp

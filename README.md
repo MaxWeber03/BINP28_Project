@@ -26,12 +26,25 @@ less 01_raw/ProjTaxa.vcf
 ##FORMAT=<ID=SB,Number=4,Type=Integer,Description="Per-sample component statistics which comprise the Fisher's Exact Test to detect strand bias.">
 ```
 
+GT is the genotype (reference or alternative), AD is the number of reads supporting each allele, DP total reads covering the site, GQ is the confidence of the genotype
+
+## Explaination of columns in "INFO" column:
+```
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency, for each ALT allele, in the same order as listed">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+```
+
+Present in our data are AC (Allele Count) and AN (Allele Number). AC gives the number of one genotype (for a SNP one Nucleotide) across the samples, that is not the reference. Since there can be multiple alterantives to the reference, the AC can give multiple values (matches order of alternatives). The Allele Number is the total number of how often that site was called (regardless of which allele it is, just how often we have data for the site). => The AN could be useful for filtering to exclude sites for which we do not have much data, and AC could be useful to filter very rare variants.
+
 ## Columns headers in the vcf file
 ```
 #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  8N05240 8N05890 8N06612 8N73248 8N73604 K006    K010    K011    K015    K019    Lesina_280      Lesina_281      Lesina_282      Lesina_285      Lesina_286        Naxos2
 ```
 
-Everything after FORMAT are the individual samples. The FILTER column was not used at all (just ".").
+Everything after FORMAT are the individual samples. The FILTER column was not used at all (just "."). The INFO columns gives the values AC and AN for each variant.
+
+Further Info on VCF file structure: https://samtools.github.io/hts-specs/VCFv4.5.pdf
 
 ## Example row
 ```

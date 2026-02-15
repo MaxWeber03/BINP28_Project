@@ -91,5 +91,7 @@ and reads with low confidence (low reads). AN has been filtered with <30 to excl
 
 
 
-### Further Ideas
+### Further Ideas/Questions
 - add Snakemake (if the available time allows)
+    - How does snakemake work with R and R packages?
+- What threshold for pruning?

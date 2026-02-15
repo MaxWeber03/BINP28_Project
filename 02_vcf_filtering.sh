@@ -23,6 +23,11 @@ man bcftools
 # Directory for filtered data
 mkdir 02_vcf_filtered
 
+# Check chromosomes of the input data
+grep -v ^\#\# 01_raw/ProjTaxa.vcf | awk '{print $1}' | sort | uniq -c
+# 2213993 chr5
+# 1602984 chrZ
+# Data exists on chr5 and chrZ
 
 ###########
 # Step 1: Remove Outgroup "Naxos2"
@@ -116,6 +121,10 @@ plot-vcfstats -v -p 02_vcf_filtered/stats_plots_after_filtering/ 02_vcf_filtered
 # ts/tv improved from 1.68 to 1.79, no more singletons (AC=1)
 # the read depth plot has changed according to our cutoffs
 
+# What chromosomes remain after filtering?
+grep -v ^\#\# 02_vcf_filtered/an_ac_filtered.vcf | awk '{print $1}' | sort | uniq -c
+#   62141 chr5
+#   50188 chrZ
 
 # Delete data not needed anymore (replication should be no issue), to save disk space
 rm -r 02_vcf_filtered/stats_plots_after_filtering
@@ -124,3 +133,5 @@ rm 02_vcf_filtered/dp_masked.vcf
 rm 02_vcf_filtered/*.vchk
 rm 02_vcf_filtered/outgroup_removed.vcf
 
+mkdir 03_gds_pruning
+mkdir 04_pca

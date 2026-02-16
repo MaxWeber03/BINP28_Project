@@ -16,3 +16,4 @@ stats_plots_outgroup_removed/
 *.vchk
 *.gds
 .Rhistory
+*.toc

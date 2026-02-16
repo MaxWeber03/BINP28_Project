@@ -116,7 +116,7 @@ pc12 = ggplot(data = eigenvec_table1234,
     y = paste0("PC2 (", round(pc.percent[2], 2), "% Variance)"),
     color = "Population"
   ) +
-  theme(legend.position = "bottom")
+  theme(legend.position = "right")
 
 pc12
 
@@ -133,8 +133,8 @@ pc34 = ggplot(data = eigenvec_table1234,
   
 pc34
 
-ggsave(filename = "./04_pca/pc12.png", plot = pc12, dpi = 300, width = 5, height = 4)
-ggsave(filename = "./04_pca/pc34.png", plot = pc34, dpi = 300, width = 5, height = 4)
+ggsave(filename = "./04_pca/pc12.png", plot = pc12, dpi = 300, width = 5, height = 2.5)
+ggsave(filename = "./04_pca/pc34.png", plot = pc34, dpi = 300, width = 5, height = 3)
 
 
 # Make Elbow/Scree Plot ---------------------------------------------------
@@ -151,7 +151,7 @@ elbow_plot = ggplot(data = elbow_plot_data, aes(x = PC, y = variance)) +
 
 elbow_plot
 
-ggsave(filename = "./04_pca/elbow_plot.png", plot = elbow_plot, dpi = 300, width = 5, height = 4)
+ggsave(filename = "./04_pca/elbow_plot.png", plot = elbow_plot, dpi = 300, width = 5, height = 3)
 
 # First 4 components explain variance, but the amout of variance explained after the first 4 does not drop of clearly, but very slowly
 # Not the typical elbow shape

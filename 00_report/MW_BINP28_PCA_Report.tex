@@ -23,16 +23,47 @@
 
 % Title Page
 \maketitle
+\tableofcontents
+\newpage
+
+\section{Methods}
+
 
 % Notes
 To run the PCA the R package SNPRelate could be useful: \cite{SNPRelate}.
 
 For VCF Cleaning/Filtering bcftools (not vcftools!): \cite{bcftools, samtools}.
 
+Tidyverse for data handling and plotting \cite{tidyverse}.
+R \cite{RCore}
+
+\FloatBarrier
+\section{Results}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{../04_pca/pc12.png}
+    \caption{PC1 and PC2 of PCA run on genetic variances among 15 individuals from three different populations. The true population names are unknown, instead, the common start of the sample names are used.}
+    \label{pc12}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.85\linewidth]{../04_pca/elbow_plot.png}
+    \caption{Scree plot of PCA run on genetic variances among 15 individuals from three different populations. The x-axis gives the number of the PC, the y-axis shows how much variance is explained by a PC in \%.}
+    \label{scree_plot}
+\end{figure}
+
+\FloatBarrier
+\section{Discussion}
+
 - Variance homogenous for all PCs => does fit expected ``elbow shape'' (but does fit at the start with PC1, so overall it fits, just not a sharp elbow)
 - Last PC (15) artifact, because we have 15 samples, we should only have 14 PC, did not find option to limit PCs in SNPRelate
 
-% add references
+% References
+\newpage
 \bibliography{references}
 
 \end{document}

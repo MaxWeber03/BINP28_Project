@@ -101,8 +101,8 @@ print(eigenvec_table1234)
 
 # variance proportion (%)
 pc.percent <- pca$varprop*100
-head(round(pc.percent, 2))
-# 11.06  8.70  8.15  7.90  7.37  6.90
+pc.percent
+# sharp drop at PC 15
 
 
 # Rebuild the graph in ggplot (nicer, easier export) ----------------------
@@ -145,10 +145,13 @@ elbow_plot_data =
   )
 
 elbow_plot = ggplot(data = elbow_plot_data, aes(x = PC, y = variance)) +
-  labs(x = "PC", y = "Variance accounted for per PC") +
+  labs(x = "PC", y = "Variance accounted for per PC (%)") +
   geom_point()
 
 ggsave(filename = "./04_pca/elbow_plot.png", plot = elbow_plot, dpi = 300, width = 5, height = 4)
+
+# First 4 components explain variance, but the amout of variance explained after the first 4 does not drop of clearly, but very slowly
+# Not the typical elbow shape
 
 # SNP Loadings - How much does each SNP contribute to a PC ----------------
 

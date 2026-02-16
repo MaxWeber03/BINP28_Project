@@ -142,7 +142,7 @@ ggsave(filename = "./04_pca/pc34.png", plot = pc34, dpi = 300, width = 5, height
 elbow_plot_data = 
   data.frame(
     variance = pc.percent,
-    PC = seq(1:length(pc.percent)-1)
+    PC = seq(1:length(pc.percent))
   )
 
 elbow_plot = ggplot(data = elbow_plot_data, aes(x = PC, y = variance)) +

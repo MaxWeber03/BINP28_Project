@@ -16,39 +16,22 @@ sessionInfo()
 # SNPRelate_1.44.0 gdsfmt_1.46.0 tidyverse_2.0.0
  
 
-# Read .vcf and convert to GDS --------------------------------------------
+# Open GDS file -----------------------------------------------------------
 
-snpgdsVCF2GDS(vcf.fn = "./02_vcf_filtered/an_ac_filtered.vcf",
-              out.fn = "./03_gds_pruning/converted.gds",
-              method = "copy.num.of.ref" # ncluding bi-allelic SNPs, multi-allelic SNPs, indels and structural variants
-              )
-
-snpgdsSummary(gds = "./03_gds_pruning/converted.gds")
-# The file name: /home/max/OneDrive/Uni/Master_Lund/2._Semester/BINP28_Sequencing_Informatics_I/11_Project/03_gdp/converted.gdc 
-# The total number of samples: 15 
-# The total number of SNPs: 112329 
-# SNP genotypes are stored in SNP-major mode (Sample X SNP).
-# The number of valid samples: 15 
-# The number of biallelic unique SNPs: 99971 
-
-
-# LD Pruning --------------------------------------------------------------
-
-# open data
 snp_data = snpgdsOpen("./03_gds_pruning/converted.gds")
 str(snp_data)
+
+# LD decay plot -----------------------------------------------------------
+# Create LD decay plot to find a sensible ld.threshold (r²)
+
+
+# LD Pruning -------------------------------------------------------------
 
 # the pruning uses some randomeness, for reproducibility, we can set a seed
 set.seed(seed = 1)
 
-# run pruning
-spn_pruned = snpgdsLDpruning(snp_data, ld.threshold=0.2, autosome.only = FALSE)
-# why 0.2? The manual recommends to try different values. What am I looking for?
-
+spn_pruned = snpgdsLDpruning(snp_data, ld.threshold=0.7, autosome.only = FALSE)
 str(spn_pruned)
-# only chr5 remains when autosome.only = FALSE is set to TRUE (default)
-# WIth FALSE we now have Chrom 5 ad Chrom Z
-
 
 # PCA ---------------------------------------------------------------------
 
@@ -78,7 +61,7 @@ eigenvec_table1234 = data.frame(sample.id = pca$sample.id,
                   EV4 = pca$eigenvect[,4])
 print(eigenvec_table1234)
 
-#SNPRelate calls the axises eigenvector 1 and 2, but it is the same as pc 1 and 2
+#SNPRelate calls the axis eigenvector 1 and 2, but it is the same as pc 1 and 2
 # https://support.bioconductor.org/p/119389/
 
 # Draw 1 and 2
@@ -175,3 +158,5 @@ length(snp_loadings$snp.id)
 # So we should be able to find that number in our an_ac_filtered file,if we have IDs in that file.
 # As of now, our file has no IDs (just ".") so the ID we have here is internal from SNPRelate.
 # It should be possible make this work by giving proper IDs to the vcf file (maybe with bcftools?)
+# Alternativly snpgdsSNPList() gives out the snp.id chromosome etc for each snp
+snpgdsSNPList(snp_data)

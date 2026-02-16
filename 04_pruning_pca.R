@@ -1,5 +1,5 @@
 # Max Weber BINP28 Project
-# Import filtered vcf and analyse with SNPRelate to get PCA
+# Import gdp and analyse with SNPRelate to get PCA
 
 # Packages and Version Info -----------------------------------------------
 
@@ -21,64 +21,29 @@ sessionInfo()
 snp_data = snpgdsOpen("./03_gds_pruning/converted.gds")
 str(snp_data)
 
-# LD decay plot -----------------------------------------------------------
-# Create LD decay plot to find a sensible ld.threshold (r²)
-
-# Take sample of Variants (using all them would be too big
-ld_decay_snp.id = sample(snpgdsSNPList(snp_data)$snp.id, 500)
-length(ld_decay_snp.id) #1000 snp.ids
-
-# next we can use snpgdsLDMat to get the LD for pairs of variants
-ld_result = snpgdsLDMat(gdsobj = snp_data, snp.id = ld_decay_snp.id, method = "corr") 
-# selects our data (snp_data), the sampled snp.ids and returns the LD as r (orther metrics are avilable too, 
-# but r² is the one used downstream by snpgdsLDpruning() )
-
-ld_composite = ld_result$LD
-hist(ld_composite)
-
-
-# get distances between the variants
-snpinfo <- snpgdsSNPList(snp_data)
-snp.pos <- snpinfo$pos[ld_decay_snp.id]
-distances <- as.vector(abs(outer(snp.pos, snp.pos, "-")))
-  # outer() takes the positions of the snp and makes a matrix of all pairwise distances
-  # abs() then gets the absolute value of each distance
-distances # distances
-length(distances)
-
-# if the distance is zero we are comparing a variant against itself
-keep_trues = distances != 0
-
-# exclude these through the false/true values
-distances = distances[keep_trues]
-ld_composite = ld_composite[keep_trues]
-length(distances)
-str(distances)
-length(ld_composite)
-str(ld_composite)
-# we now have removed some of the values, and the two vectors have the same length
-
-# make df
-ld_decay_df = data.frame(
-  distance = distances,
-  ld_composite = ld_composite
-)
-
-ld_decay_df_sampled = slice_sample(
-  .data = ld_decay_df,
-  n = 1000
-)
-nrow(ld_decay_df_sampled)
-
-plot(x = ld_decay_df_sampled$distance, y = ld_decay_df_sampled$ld_composite)
-
 # LD Pruning -------------------------------------------------------------
+# The LD decay plots (see 05_ld_decay.R) did not give any proper results.
+# Hence I am now just sticking to the default value from the SNPRelate manual (0.2)
 
 # the pruning uses some randomeness, for reproducibility, we can set a seed
 set.seed(seed = 1)
 
 spn_pruned = snpgdsLDpruning(snp_data, ld.threshold=0.2, autosome.only = FALSE, method="r")
-str(spn_pruned)
+# SNP pruning based on LD:
+#   Excluding 1,067 SNPs (monomorphic: TRUE, MAF: 0.005, missing rate: 0.01)
+# # of samples: 15
+# # of SNPs: 111,262
+# using 1 thread/core
+# sliding window: 500,000 basepairs, Inf SNPs
+# |LD| threshold: 0.2
+# method: R
+# Chrom 5: |====================|====================|
+#   2.15%, 1,334 / 62,141 (Mon Feb 16 15:48:26 2026)
+# Chrom Z: |====================|====================|
+#   2.03%, 1,020 / 50,188 (Mon Feb 16 15:48:26 2026)
+# 2,354 markers are selected in total.
+
+# str(spn_pruned)
 
 # PCA ---------------------------------------------------------------------
 
@@ -132,6 +97,13 @@ print(eigenvec_table1234)
 #        legend=levels(eigenvec_table1234$pop), 
 #        pch="o", col=1:nlevels(eigenvec_table1234$pop))
 
+# Calculate explained variance per eigenvector ----------------------------
+
+# variance proportion (%)
+pc.percent <- pca$varprop*100
+head(round(pc.percent, 2))
+# 11.06  8.70  8.15  7.90  7.37  6.90
+
 
 # Rebuild the graph in ggplot (nicer, easier export) ----------------------
 # PC1-2
@@ -139,8 +111,8 @@ pc12 = ggplot(data = eigenvec_table1234,
        aes(x = EV1, y = EV2, color = pop)) +
   geom_point() +
   labs(
-    x = "PC1",
-    y = "PC2",
+    x = paste0("PC1 (", round(pc.percent[1], 2), "% Variance)"),
+    y = paste0("PC2 (", round(pc.percent[2], 2), "% Variance)"),
     color = "Population"
   ) +
   theme(legend.position = "bottom")
@@ -152,8 +124,8 @@ pc34 = ggplot(data = eigenvec_table1234,
        aes(x = EV3, y = EV4, color = pop)) +
   geom_point() +
   labs(
-    x = "PC3",
-    y = "PC4",
+    x = paste0("PC3 (", round(pc.percent[3], 2), "% Variance)"),
+    y = paste0("PC4 (", round(pc.percent[4], 2), "% Variance)"),
     color = "Population"
   ) +
   theme(legend.position = "bottom")
@@ -164,14 +136,6 @@ ggsave(filename = "./04_pca/pc12.png", plot = pc12, dpi = 300, width = 5, height
 ggsave(filename = "./04_pca/pc34.png", plot = pc34, dpi = 300, width = 5, height = 4)
 
 
-# Calculate explained variance per eigenvector ----------------------------
-
-# variance proportion (%)
-pc.percent <- pca$varprop*100
-head(round(pc.percent, 2))
-# 11.19  8.67  8.62  7.83  7.42  7.31
-
-
 # Make Elbow/Scree Plot ---------------------------------------------------
 
 elbow_plot_data = 
@@ -180,9 +144,11 @@ elbow_plot_data =
     PC = seq(1:length(pc.percent))
   )
 
-ggplot(data = elbow_plot_data, aes(x = PC, y = variance)) +
+elbow_plot = ggplot(data = elbow_plot_data, aes(x = PC, y = variance)) +
   labs(x = "PC", y = "Variance accounted for per PC") +
   geom_point()
+
+ggsave(filename = "./04_pca/elbow_plot.png", plot = elbow_plot, dpi = 300, width = 5, height = 4)
 
 # SNP Loadings - How much does each SNP contribute to a PC ----------------
 

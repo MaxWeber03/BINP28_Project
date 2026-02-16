@@ -104,3 +104,9 @@ legend("bottom",
 pc.percent <- pca$varprop*100
 head(round(pc.percent, 2))
 # 11.20  8.80  8.57  7.96  7.42  7.38
+
+
+
+# Correlation -------------------------------------------------------------
+
+

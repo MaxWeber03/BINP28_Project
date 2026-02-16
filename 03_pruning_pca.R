@@ -133,9 +133,45 @@ pc34
 ggsave(filename = "./04_pca/pc12.png", plot = pc12, dpi = 300, width = 5, height = 4)
 ggsave(filename = "./04_pca/pc34.png", plot = pc34, dpi = 300, width = 5, height = 4)
 
+
 # Calculate explained variance per eigenvector ----------------------------
 
 # variance proportion (%)
 pc.percent <- pca$varprop*100
 head(round(pc.percent, 2))
 # 11.19  8.67  8.62  7.83  7.42  7.31
+
+
+# Make Elbow/Scree Plot ---------------------------------------------------
+
+elbow_plot_data = 
+  data.frame(
+    variance = pc.percent,
+    PC = seq(1:length(pc.percent))
+  )
+
+ggplot(data = elbow_plot_data, aes(x = PC, y = variance)) +
+  labs(x = "PC", y = "Variance accounted for per PC") +
+  geom_point()
+
+# SNP Loadings - How much does each SNP contribute to a PC ----------------
+
+snp_loadings = snpgdsPCASNPLoading(
+  pcaobj = pca,
+  gdsobj = snp_data
+)
+
+names(snp_loadings)
+dim(snp_loadings$snploading) # SNP loadings, or SNP eigenvectors
+# View(snp_loadings$snploading)
+# we now have a df of loadings with PC in rows and snp in columns and the loading from the PCA as values
+
+plot(snp_loadings$snploading[1,], type="h", ylab="PC 1")
+
+# How can this be connected back to the SNPs? What value/unit does the load have?
+length(snp_loadings$snp.id)
+# We have a SNP ID for each loading
+
+# So we should be able to find that number in our an_ac_filtered file,if we have IDs in that file.
+# As of now, our file has no IDs (just ".") so the ID we have here is internal from SNPRelate.
+# It should be possible make this work by giving proper IDs to the vcf file (maybe with bcftools?)

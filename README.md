@@ -7,7 +7,7 @@ We have a .vcf file without much futher detail on the data or the species. I am 
 
 # Workflow Overview
 
-The analysis here is divided into 4 major steps with respective folders and scripts. The scripts require conda and r. The installation command for the used r packages is included, the # must be removed to run them.
+The analysis here is divided into 4 major steps with respective folders and scripts. Running the scripts requires R and Conda to be installed. The installation commands for the used R packages is included in the R scripts as comments (remove # to run).
 
 Software Versions:
  - conda 25.11.1
@@ -33,7 +33,7 @@ Software Versions:
 ***************************************
 
 # Data
-The .vcf file contains variants called for 15 samples from 3 population, and one additonal sample ("Naxos2"), which is an outgroup for phylogenetics that we will not use for the PCA.
+The .vcf file contains variants called for 15 samples from 3 population, and one additonal sample ("Naxos2"), which is an outgroup for phylogenetics that we will not use for the PCA. The raw data is not provided here, reproduction is not possible without access to the university server.
 
 ```
 less 01_raw/ProjTaxa.vcf

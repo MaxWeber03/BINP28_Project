@@ -1,3 +1,8 @@
+# Max Weber BINP28 Project
+# Import filtered vcf and analyse with SNPRelate to get PCA
+
+# Packages and Version Info -----------------------------------------------
+
 R.version.string 
 # R version 4.5.2 (2025-10-31)
 
@@ -12,6 +17,7 @@ sessionInfo()
  
 
 # Read .vcf and convert to GDS --------------------------------------------
+
 snpgdsVCF2GDS(vcf.fn = "./02_vcf_filtered/an_ac_filtered.vcf",
               out.fn = "./03_gds_pruning/converted.gds",
               method = "copy.num.of.ref" # ncluding bi-allelic SNPs, multi-allelic SNPs, indels and structural variants
@@ -27,34 +33,29 @@ snpgdsSummary(gds = "./03_gds_pruning/converted.gds")
 
 
 # LD Pruning --------------------------------------------------------------
+
 # open data
 snp_data = snpgdsOpen("./03_gds_pruning/converted.gds")
 str(snp_data)
 
+# the pruning uses some randomeness, for reproducibility, we can set a seed
+set.seed(seed = 1)
+
 # run pruning
-spn_pruned = snpgdsLDpruning(snp_data, ld.threshold=0.2)
+spn_pruned = snpgdsLDpruning(snp_data, ld.threshold=0.2, autosome.only = FALSE)
 # why 0.2? The manual recommends to try different values. What am I looking for?
 
-# SNP pruning based on LD:
-#   Excluding 50,188 SNPs on non-autosomes
-# Excluding 710 SNPs (monomorphic: TRUE, MAF: 0.005, missing rate: 0.01)
-# # of samples: 15
-# # of SNPs: 61,431
-# using 1 thread/core
-# sliding window: 500,000 basepairs, Inf SNPs
-# |LD| threshold: 0.2
-# method: composite
-# Chrom 5: |====================|====================|
-#   1.12%, 696 / 62,141 (Sun Feb 15 18:08:05 2026)
-# 696 markers are selected in total.
-
 str(spn_pruned)
-# only chr5 remains.
+# only chr5 remains when autosome.only = FALSE is set to TRUE (default)
+# WIth FALSE we now have Chrom 5 ad Chrom Z
 
 
 # PCA ---------------------------------------------------------------------
+
 snpset.id <- unlist(unname(spn_pruned))
-pca <- snpgdsPCA(snp_data, snp.id=snpset.id, num.thread=2)
+pca <- snpgdsPCA(snp_data, snp.id=snpset.id, algorithm = "exact")
+# algorithm can be randomized (faster, causes small deviations) or exact. 
+# Since our dataset it not that big, we will go with exact for better repdorcuibility
 
 
 # PCA Plotting ------------------------------------------------------------
@@ -68,14 +69,13 @@ print(
     sample.id, 
     pop_code)) 
 
-# create table with eigenvectors
+# create table with eigenvectors 1-4, sample names and populations
 eigenvec_table1234 = data.frame(sample.id = pca$sample.id,
                   pop = factor(pop_code)[match(pca$sample.id, sample.id)],
                   EV1 = pca$eigenvect[,1],    # the first eigenvector
                   EV2 = pca$eigenvect[,2],    # the second eigenvector
                   EV3 = pca$eigenvect[,3],
-                  EV4 = pca$eigenvect[,4],
-                  stringsAsFactors = FALSE)
+                  EV4 = pca$eigenvect[,4])
 print(eigenvec_table1234)
 
 #SNPRelate calls the axises eigenvector 1 and 2, but it is the same as pc 1 and 2
@@ -134,11 +134,8 @@ ggsave(filename = "./04_pca/pc12.png", plot = pc12, dpi = 300, width = 5, height
 ggsave(filename = "./04_pca/pc34.png", plot = pc34, dpi = 300, width = 5, height = 4)
 
 # Calculate explained variance per eigenvector ----------------------------
+
 # variance proportion (%)
 pc.percent <- pca$varprop*100
 head(round(pc.percent, 2))
-# 11.20  8.80  8.57  7.96  7.42  7.38
-
-
-
-
+# 11.19  8.67  8.62  7.83  7.42  7.31

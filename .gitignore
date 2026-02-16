@@ -15,3 +15,4 @@ stats_plots_outgroup_removed/
 *.swp
 *.vchk
 *.gds
+.Rhistory

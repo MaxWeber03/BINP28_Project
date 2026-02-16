@@ -29,6 +29,9 @@ To run the PCA the R package SNPRelate could be useful: \cite{SNPRelate}.
 
 For VCF Cleaning/Filtering bcftools (not vcftools!): \cite{bcftools, samtools}.
 
+- Variance homogenous for all PCs => does fit expected ``elbow shape'' (but does fit at the start with PC1, so overall it fits, just not a sharp elbow)
+- Last PC (15) artifact, because we have 15 samples, we should only have 14 PC, did not find option to limit PCs in SNPRelate
+
 % add references
 \bibliography{references}
 

@@ -1,36 +1,12 @@
 Max Weber BINP28 M. Sc. Bioinformatics Programme Lund University, Feb 2026
 
-A Git Repository for this project can be found here: https://github.com/MaxWeber03/BINP28_Project.
+# Git Repository
+Git Repository for this project can be found here: https://github.com/MaxWeber03/BINP28_Project.
+
+I know that having both the report (latex code) and the project code in the same repo is not a clean solution, but I want to avoid bloating my github with multiple repos for a small project.
 
 # Instructions Summary
 We have a .vcf file without much futher detail on the data or the species. I am tasked with "Genetic relationship/Multivariate relationship from a PCA". We do not have much information. 3.5 days are available including writing of a two pages report and a two slide/3 min presentation.
-
-# Workflow Overview
-
-The analysis here is divided into 4 major steps with respective folders and scripts. The scripts require conda and r. The installation command for the used r packages is included, the # must be removed to run them.
-
-Software Versions:
- - conda 25.11.1
- - R version 4.5.2 (2025-10-31)
- - bcftools 1.23 with matplotlib 3.9.2
- - tidyverse R package 2.0.0
- - SNPRelate R package 1.44.0
-
-0. __Report__: Not part of the analysis workflow, the directory 00_report contains the latex code to generate the report that needs to be submitted for this assignment. I know that having both the report (latex code) and the project code in the same repo is not a clean solution, but I want to avoid bloating my github with multiple repos for a small project.
-1. __Download and unpacking__ of raw data into 01_raw directory, done by 01_data_download_extraction.sh
-2. __Filtering of variants__: Done by 02_vcf_filtering.sh, output saved in 02_vcf_filtered directory. Filtering is done with bcftools by masking sites with less then 5 or more then 14 reads. These thresholds were determined from the histrogram of the read distribution produced by bcftool's plot-vcfstats function. The masked data was then filtered to not have AN below 30 (only variants without missing data, 15 diploid samples), and not less then 3 times the alterantive allele (AC > 2). The filtered output is called an_ac_filtered.vcf. This script also creates the directories for the following steps and removes some of the files that are no longer needed to save space.
-3. __Convert vcf -> gds for SNPRelate analysis__: The r script 03_convert_gds.R loads the SNPRelate package which reads the filtered .vcf file from step 2 and outputs it into SNPRelate's .gds format (into 03_gds_pruning dir).
-4. __Run LD Pruning and PCA__: The r script 04_pruning_pca.R open the .gds file from step 3, performs linkage pruning to remove variants that are likely not inherented independendly (linkage disquilibrium) and runs the PCA on the remaning variants. Plots of the first 4 PCs and a Scree plot are printed into 04_pca/.
-5. __LD decay__: To find an appropriate threshold for the LD pruning, a LD decay plot can be used. With the here used data and the SNPRelate package, there was no LD decay plot that looked as expected. See code to create the plot and further detail in 05_ld_decay.R.
-
-### To Do & Known Issues (if there was more time)
-- add Snakemake
-- make pruning step a separated r script
-- LD Pruning threshold as of now is not based on an LD decay plot of the used data
-- redo the analysis with plink and try to solve the LD decay plot there => then run analysis with threshold that matches the plot
-- sliding window PCA to look at Chromosome parts isolated and/or PCA per Chromosome instead of having one PCA for the whole genome
-
-***************************************
 
 # Data
 The .vcf file contains variants called for 15 samples from 3 population, and one additonal sample ("Naxos2"), which is an outgroup for phylogenetics that we will not use for the PCA.
@@ -74,3 +50,49 @@ Further Info on VCF file structure: https://samtools.github.io/hts-specs/VCFv4.5
 ```
 # chr5    1002    .       T       C       1711.32 .       AC=2;AN=4       GT:AD:DP:GQ:PL  ./.:71,0:71:.:. ./.:120,0:120:.:.       ./.:94,0:94:.:. 0/0:72,0:72:0:0,0,25    ./.:124,0:124:.:.       ./.:119,0:119:.:.       ./.:86,0:86:.:.       ./.:72,0:72:.:. ./.:77,0:77:.:. ./.:109,0:109:.:.       ./.:29,0:29:.:. ./.:12,0:12:.:. 1/1:1,9:10:2:254,2,0    ./.:8,0:8:.:.   ./.:20,0:20:.:. ./.:23,0:23:.:.
 ```
+## Filtering
+Filtering has been for read depth with the thresholds >14 and <5 reads in order to exclude likely artifacts (high reads)
+and reads with low confidence (low reads). AN has been filtered with <30 to exclude sites for which not all samples have diploid data. AC was filtered with <3 to exclude sites with very rare alterantives.
+
+**********************************************
+
+# Notes
+- Try to look at other papers to find tools
+- the SNPs will probably need to be heavily filtered
+- PCA very much depends on input data quality
+
+## Worflow outline
+1. Filter VCF for only good SNPs => looks at papers and documentation for threshold
+    - use bcftools, not vcftools since that is deprecated
+    - https://samtools.github.io/bcftools/howtos/index.html
+2. Run linkage pruning => SNPs should be inherented intendepently. Looking at linkage disequilibrium would be good, but available time does not allow that. (Will be done in SNPRelate in R)
+3. Run PCA => find SNPs that are explaining variance between the samples/clusters
+    - Expectation: samples should cluster together withhin each population
+    - SNPRelate: https://bioconductor.org/packages/release/bioc/vignettes/SNPRelate/inst/doc/SNPRelate.html
+
+
+### Filtering/Setup
+- Take away outgroup first!
+- Quality Scores => look for threshold recommendations in bcftools
+- Number of Reads => too many are artifacts, too few are untrsuted
+    - look at distribution/histrogram of my data
+        - Software for histrogram? => look for tools?
+    - apply it as overall (per SNP)
+        - not more then 2x mean/median is a usable value
+- Only Bi-allelic SNPs or bi-allelic SNPs, multi-allelic SNPs, indels and structural variants?
+    - focus on getting one done, we can compare both => go first with Bi-allelic
+    - SNPRelate can handle INDELS and structural variants
+        - I could try both if I have the time
+        - no INDEL relalignment, that was done before variant calling
+- How many PCs?
+    - can be done through an analysis, but uncommen in this use case, number is going to be very high since we have so many dimensions => expect only 1-3% of variance explained per PC => hence the number of PCs does not have a huge effect on the results
+- Minor Allel Frequency => don't worry about it for now
+    - could be e.g. to give SNP confidence for downstream analysis
+
+
+### Further Ideas/Questions
+- add Snakemake (if the available time allows)
+    - How does snakemake work with R and R packages?
+- What threshold for pruning?
+- Sliding window PCA to look at Chromosome parts isolated => no time
+    - Do invidividual Chromosomes instead

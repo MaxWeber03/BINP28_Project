@@ -10,6 +10,7 @@ R.version.string
 #   install.packages("BiocManager")
 
 # BiocManager::install("SNPRelate")
+# install.packages("tidyverse)
 library(SNPRelate)
 library(tidyverse)
 sessionInfo()
@@ -141,12 +142,14 @@ ggsave(filename = "./04_pca/pc34.png", plot = pc34, dpi = 300, width = 5, height
 elbow_plot_data = 
   data.frame(
     variance = pc.percent,
-    PC = seq(1:length(pc.percent))
+    PC = seq(1:length(pc.percent)-1)
   )
 
 elbow_plot = ggplot(data = elbow_plot_data, aes(x = PC, y = variance)) +
   labs(x = "PC", y = "Variance accounted for per PC (%)") +
   geom_point()
+
+elbow_plot
 
 ggsave(filename = "./04_pca/elbow_plot.png", plot = elbow_plot, dpi = 300, width = 5, height = 4)
 

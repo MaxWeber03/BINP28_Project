@@ -6,9 +6,10 @@ R.version.string
 
 # BiocManager::install("SNPRelate")
 library(SNPRelate)
+library(tidyverse)
 sessionInfo()
-# SNPRelate_1.44.0 gdsfmt_1.46.0
-
+# SNPRelate_1.44.0 gdsfmt_1.46.0 tidyverse_2.0.0
+ 
 
 # Read .vcf and convert to GDS --------------------------------------------
 snpgdsVCF2GDS(vcf.fn = "./02_vcf_filtered/an_ac_filtered.vcf",
@@ -77,27 +78,60 @@ eigenvec_table1234 = data.frame(sample.id = pca$sample.id,
                   stringsAsFactors = FALSE)
 print(eigenvec_table1234)
 
+#SNPRelate calls the axises eigenvector 1 and 2, but it is the same as pc 1 and 2
+# https://support.bioconductor.org/p/119389/
+
 # Draw 1 and 2
-plot(x = eigenvec_table1234$EV2, 
-     y = eigenvec_table1234$EV1, 
-     col=as.integer(eigenvec_table1234$pop), 
-     xlab="eigenvector 2", 
-     ylab="eigenvector 1")
-legend("bottomleft", 
-       legend=levels(eigenvec_table1234$pop), 
-       pch="o", col=1:nlevels(eigenvec_table1234$pop))
+# plot(x = eigenvec_table1234$EV2, 
+#      y = eigenvec_table1234$EV1, 
+#      col=as.integer(eigenvec_table1234$pop), 
+#      xlab="PC 2", 
+#      ylab="PC 1")
+# legend("bottomleft", 
+#        legend=levels(eigenvec_table1234$pop), 
+#        pch="o", col=1:nlevels(eigenvec_table1234$pop))
+# 
+# 
+# # Draw 3 and 4
+# plot(x = eigenvec_table1234$EV4, 
+#      y = eigenvec_table1234$EV3, 
+#      col=as.integer(eigenvec_table1234$pop), 
+#      xlab="PC 4", 
+#      ylab="PC 3")
+# legend("bottom", 
+#        legend=levels(eigenvec_table1234$pop), 
+#        pch="o", col=1:nlevels(eigenvec_table1234$pop))
 
 
-# Draw 3 and 4
-plot(x = eigenvec_table1234$EV4, 
-     y = eigenvec_table1234$EV3, 
-     col=as.integer(eigenvec_table1234$pop), 
-     xlab="eigenvector 4", 
-     ylab="eigenvector 3")
-legend("bottom", 
-       legend=levels(eigenvec_table1234$pop), 
-       pch="o", col=1:nlevels(eigenvec_table1234$pop))
+# Rebuild the graph in ggplot (nicer, easier export) ----------------------
+# PC1-2
+pc12 = ggplot(data = eigenvec_table1234,
+       aes(x = EV1, y = EV2, color = pop)) +
+  geom_point() +
+  labs(
+    x = "PC1",
+    y = "PC2",
+    color = "Population"
+  ) +
+  theme(legend.position = "bottom")
 
+pc12
+
+# PC3-4
+pc34 = ggplot(data = eigenvec_table1234,
+       aes(x = EV3, y = EV4, color = pop)) +
+  geom_point() +
+  labs(
+    x = "PC3",
+    y = "PC4",
+    color = "Population"
+  ) +
+  theme(legend.position = "bottom")
+  
+pc34
+
+ggsave(filename = "./04_pca/pc12.png", plot = pc12, dpi = 300, width = 5, height = 4)
+ggsave(filename = "./04_pca/pc34.png", plot = pc34, dpi = 300, width = 5, height = 4)
 
 # Calculate explained variance per eigenvector ----------------------------
 # variance proportion (%)
@@ -106,7 +140,5 @@ head(round(pc.percent, 2))
 # 11.20  8.80  8.57  7.96  7.42  7.38
 
 
-
-# Correlation -------------------------------------------------------------
 
 

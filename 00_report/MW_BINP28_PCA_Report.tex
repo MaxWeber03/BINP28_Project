@@ -8,6 +8,7 @@
 \usepackage[authoryear]{natbib}
 \usepackage{caption} % to adjust caption width
 \usepackage{amsmath}
+\usepackage{nameref}
 
 \bibliographystyle{myapalike}
 
@@ -24,8 +25,10 @@
 % Title Page
 \maketitle
 \tableofcontents
-\newpage
 
+% Methods
+\newpage
+\setcounter{page}{1}
 \section{Methods}
 
 The analysis is based on a .vcf file with 16 samples (Chromosome 5 and Z) from 4 population, of which one population is an outgroup with only one sample.
@@ -39,12 +42,15 @@ Bcftools automatically adjusts the AN (count of sites with known alleles) AC (co
 Further analysis of the filtered data was performed in R v 4.5.2 \citep{RCore} using the package ``tidyverse'' for data handling and plotting \citep{tidyverse} and the package ``SNPRelate'' for LD (linkage disequilibrium) pruning and PCA \citep{SNPRelate}.
 SNPRelate was chosen due to fast performance compared to alternatives due to multi-threading support and it's ability to handle different variant types \citep{SNPRelate}.
 
-The filtered variants were converted from vcf to SNPRelate's gds format, LD pruning was performed on the whole genome (both available chromosomes) with a threshold of r = 0.2. This excluded a large proportion of the samples reducing the number of variants from 112,329 to just 2,354. This number is suspiciously low, and trying
-
-  vdsv´
+The filtered variants were converted from vcf to SNPRelate's gds format, LD pruning was performed on the whole genome (both available chromosomes) with a threshold of r = 0.2. The threshold was choosen as it is the default in the SNPRelate documentation and finding a more appropriate threshold through a LD decay plot was giving unexpected results (see \nameref{discussion}).
+This excluded a large proportion of the samples, reducing the number of variants from 112,329 to just 2,354, which is suspicously low.
+A PCA was run on the remaining variants using SNPRelate.
 
 \FloatBarrier
+% Results
 \section{Results}
+
+
 
 
 \begin{figure}[h]
@@ -63,7 +69,9 @@ The filtered variants were converted from vcf to SNPRelate's gds format, LD prun
 \end{figure}
 
 \FloatBarrier
+%Discussion
 \section{Discussion}
+\label{discussion}
 
 - Variance homogenous for all PCs => does fit expected ``elbow shape'' (but does fit at the start with PC1, so overall it fits, just not a sharp elbow)
 - Last PC (15) artifact, because we have 15 samples, we should only have 14 PC, did not find option to limit PCs in SNPRelate

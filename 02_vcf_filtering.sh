@@ -127,6 +127,7 @@ grep -v ^\#\# 02_vcf_filtered/an_ac_filtered.vcf | awk '{print $1}' | sort | uni
 #   50188 chrZ
 
 # Delete data not needed anymore (replication should be no issue), to save disk space
+mv 02_vcf_filtered/stats_plots_outgroup_removed/summary.pdf 02_vcf_filtered/stats_plots_outgroup_removed.pdf
 rm -r 02_vcf_filtered/stats_plots_after_filtering
 rm -r 02_vcf_filtered/stats_plots_outgroup_removed
 rm 02_vcf_filtered/dp_masked.vcf

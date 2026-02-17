@@ -10,7 +10,9 @@
 \usepackage{amsmath}
 \usepackage{nameref}
 
+
 \bibliographystyle{myapalike}
+
 
 \usepackage[hidelinks]{hyperref} % links in the text, should be loaded last
 
@@ -35,23 +37,23 @@ The analysis is based on a .vcf file with 16 samples (Chromosome 5 and Z) from 4
 Variant calling was already performed before this analysis, no detail on the upstream workflow or the origin of the samples are known.
 Before running a PCA on the variants, filtering of the variants was done with bcftools v. 1.23 \citep{bcftools, samtools}.
 The outgroup sample was removed and each sample and site combination was filtered based on sequencing depth, data with less then 3 or more then 14 reads was excluded.
+The sequencing depth threshold was based on the distribution of reads (\autoref{bcfstats}).
 
-The sequencing depth threshold was based on the distribution of reads.
 Bcftools automatically adjusts the AN (count of sites with known alleles) AC (count of alternative alleles) values based on the masking, make subsequent filtering based on AN = 30 and AC $>$ 2 possible. The AN filtering excludes all sites for which not all samples have data or samples that are masked from the previous step, as we have 15 diploid samples, yielding AN = 30 only if all samples have available available data. The filtering reduces the number variants from 3,816,977 to 112,329 variants.
 
 Further analysis of the filtered data was performed in R v 4.5.2 \citep{RCore} using the package ``tidyverse'' for data handling and plotting \citep{tidyverse} and the package ``SNPRelate'' for LD (linkage disequilibrium) pruning and PCA \citep{SNPRelate}.
 SNPRelate was chosen due to fast performance compared to alternatives due to multi-threading support and it's ability to handle different variant types \citep{SNPRelate}.
 
-The filtered variants were converted from vcf to SNPRelate's gds format, LD pruning was performed on the whole genome (both available chromosomes) with a threshold of r = 0.2. The threshold was choosen as it is the default in the SNPRelate documentation and finding a more appropriate threshold through a LD decay plot was giving unexpected results (see \nameref{discussion}).
-This excluded a large proportion of the samples, reducing the number of variants from 112,329 to just 2,354, which is suspicously low.
+The filtered variants were converted from vcf to SNPRelate's gds format, LD pruning was performed on the whole genome (both available chromosomes) with a threshold of r = 0.2. The threshold was choose as it is the default in the SNPRelate documentation and finding a more appropriate threshold through a LD decay plot was giving unexpected results (see \nameref{discussion}).
+This excluded a large proportion of the samples, reducing the number of variants from 112,329 to just 2,354, which is suspiciously low.
 A PCA was run on the remaining variants using SNPRelate.
+
+The code for the whole analysis is accessible on \href{https://github.com/MaxWeber03/BINP28_Project}{GitHub}.
 
 \FloatBarrier
 % Results
 \section{Results}
-
-
-
+The PCA shows clear clustering of the samples along PC1 and PC2 (\autoref{pc12}), however, the clustering becomes less clear on the following PCs (\autoref{pc34}). The first PC accounted for approx. 11\% of variance, this dropped to approx. 8\% for PC2-4. The drop-off in accounted for variance is very smooth around PC1-3, and homogeneous between PC6 and PC14 which all account for approx. 6-7\% of variance (\autoref{scree_plot}). The variance drops to approx. 0\% for PC15, this is expected due to the maximum number of ranks after centering being n - 1, so 14, as 15 samples were used.
 
 \begin{figure}[h]
     \centering
@@ -60,11 +62,10 @@ A PCA was run on the remaining variants using SNPRelate.
     \label{pc12}
 \end{figure}
 
-
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.85\linewidth]{../04_pca/elbow_plot.png}
-    \caption{Scree plot of PCA run on genetic variances among 15 individuals from three different populations. The x-axis gives the number of the PC, the y-axis shows how much variance is explained by a PC in \%.}
+    \caption{Scree plot of PCA run on genetic variances among 15 individuals from three different populations. The x-axis gives the number of the PC, the y-axis shows how much variance is explained by a PC in percent.}
     \label{scree_plot}
 \end{figure}
 
@@ -72,13 +73,44 @@ A PCA was run on the remaining variants using SNPRelate.
 %Discussion
 \section{Discussion}
 \label{discussion}
+The PCA worked as expected with nice clustering along PC1 and PC2. However, the number of used variants for the PCA was very low (2,354) in comparison to the total number of variants in the unfiltered vcf file.
+The first step of filtering based on AC and AN was very strict, leading to a strong reduction of variants.
+The filter for AN was set to exclude all variants with missing data, because the number of samples is low (15 samples on 3 populations).
+However, the AN threshold could be lowered to let more variants pass through and thereby use more of the data.
+Furthermore, the LD pruning step excluded a large proportion ($>$ 90\%) of the filtered variants.
+Finding a more appropriate threshold through a LD decay plot with SNPRelate was not possible, as the plots generated through different methods resulted in plots, with no recognisable pattern.
+More detail on this process can be found in \href{https://github.com/MaxWeber03/BINP28_Project/blob/master/05_ld_decay.R}{the corresponding R script}.
+For further troubleshooting this analysis step and the LD decay step could be redone on a different tool (e.g. plink). If a LD decay plot showing the expected pattern is thereby achieved, the LD pruning threshold should be adjusted accordingly.
 
-- Variance homogenous for all PCs => does fit expected ``elbow shape'' (but does fit at the start with PC1, so overall it fits, just not a sharp elbow)
-- Last PC (15) artifact, because we have 15 samples, we should only have 14 PC, did not find option to limit PCs in SNPRelate
+Moreover, the PCA and LD pruning could be done per chromosome instead of once for the whole genome, or in sliding-windows. This could reveal genetic regions or chromosomes that are closer related (clear clustering) or less related.
+The influence of each Variant to a PC was also calculated as the SNP loading and could be related back to the original data. However, due to the high number of variants, the SNP loadings become different to interpret. Many variants contribute largely to the PCs, and with that to the difference between the populations, making it hard to pinpoint individual variants responsible for the differences. This suggests that not a few variants make out the differences between the species. Instead a high number of variants, with difference magnitude of influence, contributes to the differences between the individuals and between the populations.
 
 % References
 \newpage
 \bibliography{references}
+
+% Supplemental Material
+\newpage
+\FloatBarrier
+\section{Supplemental Material}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\linewidth]{../04_pca/pc34.png}
+    \caption{PC3 and PC4 of PCA run on genetic variances among 15 individuals from three different populations. The true population names are unknown, instead, the common start of the sample names are used. From PC3 on, the samples do not cluster into their populations.}
+    \label{pc34}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[
+      page=13,
+      width=\linewidth,
+      trim = 150 100 150 100 clip
+      ]{../02_vcf_filtered/stats_plots_outgroup_removed.pdf}
+    \caption{Plot of read depth of the data after removing the outgroup used to set read depth masking thresholds. Created with bcftools stats and plot-vcfstats.}
+    \label{bcfstats}
+\end{figure}
 
 \end{document}
 

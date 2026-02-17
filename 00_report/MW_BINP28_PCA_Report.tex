@@ -28,20 +28,26 @@
 
 \section{Methods}
 
+The analysis is based on a .vcf file with 16 samples (Chromosome 5 and Z) from 4 population, of which one population is an outgroup with only one sample.
+Variant calling was already performed before this analysis, no detail on the upstream workflow or the origin of the samples are known.
+Before running a PCA on the variants, filtering of the variants was done with bcftools v. 1.23 \citep{bcftools, samtools}.
+The outgroup sample was removed and each sample and site combination was filtered based on sequencing depth, data with less then 3 or more then 14 reads was excluded.
 
-% Notes
-To run the PCA the R package SNPRelate could be useful: \cite{SNPRelate}.
+The sequencing depth threshold was based on the distribution of reads.
+Bcftools automatically adjusts the AN (count of sites with known alleles) AC (count of alternative alleles) values based on the masking, make subsequent filtering based on AN = 30 and AC $>$ 2 possible. The AN filtering excludes all sites for which not all samples have data or samples that are masked from the previous step, as we have 15 diploid samples, yielding AN = 30 only if all samples have available available data. The filtering reduces the number variants from 3,816,977 to 112,329 variants.
 
-For VCF Cleaning/Filtering bcftools (not vcftools!): \cite{bcftools, samtools}.
+Further analysis of the filtered data was performed in R v 4.5.2 \citep{RCore} using the package ``tidyverse'' for data handling and plotting \citep{tidyverse} and the package ``SNPRelate'' for LD (linkage disequilibrium) pruning and PCA \citep{SNPRelate}.
+SNPRelate was chosen due to fast performance compared to alternatives due to multi-threading support and it's ability to handle different variant types \citep{SNPRelate}.
 
-Tidyverse for data handling and plotting \cite{tidyverse}.
-R \cite{RCore}
+The filtered variants were converted from vcf to SNPRelate's gds format, LD pruning was performed on the whole genome (both available chromosomes) with a threshold of r = 0.2. This excluded a large proportion of the samples reducing the number of variants from 112,329 to just 2,354. This number is suspiciously low, and trying
+
+  vdsv´
 
 \FloatBarrier
 \section{Results}
 
 
-\begin{figure}
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.9\linewidth]{../04_pca/pc12.png}
     \caption{PC1 and PC2 of PCA run on genetic variances among 15 individuals from three different populations. The true population names are unknown, instead, the common start of the sample names are used.}
@@ -49,7 +55,7 @@ R \cite{RCore}
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.85\linewidth]{../04_pca/elbow_plot.png}
     \caption{Scree plot of PCA run on genetic variances among 15 individuals from three different populations. The x-axis gives the number of the PC, the y-axis shows how much variance is explained by a PC in \%.}

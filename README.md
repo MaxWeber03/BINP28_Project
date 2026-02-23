@@ -2,7 +2,9 @@ Max Weber BINP28 M. Sc. Bioinformatics Programme Lund University, Feb 2026
 
 A Git Repository for this project can be found here: 
 - Codeberg: https://codeberg.org/MaxWeber/BINP28_Project_PCA_Project
-- Github: https://github.com/MaxWeber03/BINP28_Project.
+
+A mirror on GitHub is available here:
+- https://github.com/MaxWeber03/BINP28_Project
 
 # Instructions Summary
 We have a .vcf file without much futher detail on the data or the species. I am tasked with "Genetic relationship/Multivariate relationship from a PCA". We do not have much information. 3.5 days are available including writing of a two pages report and a two slide/3 min presentation.

@@ -7,7 +7,7 @@ A mirror on GitHub is available here:
 - https://github.com/MaxWeber03/BINP28_Project
 
 # Instructions Summary
-We have a .vcf file without much futher detail on the data or the species. I am tasked with "Genetic relationship/Multivariate relationship from a PCA". We do not have much information. 3.5 days are available including writing of a two pages report and a two slide/3 min presentation.
+We have a .vcf file without much futher detail on the data or the species. I am tasked with "Genetic relationship/Multivariate relationship from a PCA". We do not have much further detail on the task, 3.5 days are available, including writing of a two pages report and a two slide/3 min presentation.
 
 # Workflow Overview
 
